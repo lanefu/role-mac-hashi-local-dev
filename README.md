@@ -6,20 +6,35 @@ sets up local hashi setup
 Requirements
 ------------
 
-Any pre-requisites that may not be covered by Ansible itself or the role should be mentioned here. For instance, if the role uses the EC2 module, it may be a good idea to mention in this section that the boto package is required.
+homebrew 
+
+How to use it
+------------
+* run role
+* run the launchctl commands printed in the debug output during execution (use unload to stop service)
+* open docker and set it up
+* add `/usr/local/var/nomad` to the docker shared folders
+* reboot to make sure DNS works
+* things should resolve as `myapp.service.dc1.consul`
+* consul gui: http://consul.service.dc1.consul:8500/
+* nomad gui: http://nomad.service.dc1.consul:4646/
+* fabio gui: http://fabio.service.dc1.consul:9998/
+
+Using with fabio
+---------------
+fabio http runs on port 9999... all your url prefixes will require 9999...
+easiset thing to do is for any app.. `urlprefix-myapp.service.dc1.consul:9999/`   then you can use DNS for http proxying and stop guessing ports
+
 
 Role Variables
 --------------
+see `defaults.yml`
 
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
-
-Dependencies
-------------
-
-A list of other roles hosted on Galaxy should go here, plus any details in regards to parameters that may need to be set for other roles, or variables that are used from other roles.
 
 Example Playbook
 ----------------
+`ansible-playbook workstation.yml -K`  (a few steps sudo, but dont run all as sudo)
+
 ```
 
 - hosts: workstation
@@ -29,6 +44,95 @@ Example Playbook
       include_role:
         name: mac-hashi-local-dev
 ```
+
+Example Nomad Job
+----------------
+running is as easy as
+`nomad run jenkins.nomad`
+
+jenkins.nomad
+```
+job "jenkins" {
+  meta {
+  	version = "20180515-02"
+  }
+  datacenters = ["dc1"]
+  type = "service"
+  update {
+    max_parallel = 1
+    min_healthy_time = "10s"
+    healthy_deadline = "8m"
+    auto_revert = false
+    canary = 0
+  }
+  group "jenkins" {
+    count = 1
+    restart {
+      attempts = 10
+      interval = "5m"
+      delay = "25s"
+      mode = "delay"
+    }
+    task "jenkins" {
+      driver = "docker"
+      env {
+        JENKINS_HOME = "/var/jenkins_home"
+        HUDSON_HOME = "/var/jenkins_home"
+     }
+      config {
+        image = "tomcat"
+        force_pull = true
+        port_map {
+          jenkins_http = 8080
+          jenkins-jlnp = 35123
+        }
+        volumes = [ 
+        "local:/usr/local/tomcat/webapps"
+	]
+    #    args = [ "jenkins", "-dataclean","-config", "${NOMAD_TASK_DIR}/config.json" ]
+      }
+      resources {
+        cpu    = 2000 # 500 MHz
+        memory = 800 # 256MB
+        network {
+          mbits = 20
+          port "jenkins_http" {}
+          port "jenkins_jnlp" {
+            static = "35123"
+          }
+        }
+      }
+      artifact {
+        source      = "http://mirrors.jenkins.io/war-stable/latest/jenkins.war"
+        destination = "local/"
+      }
+      service {
+        name = "jenkins"
+        tags = ["urlprefix-jenkins.service.dc1.consul:9999/"]
+        port = "jenkins_http"
+        check {
+          name     = "alive"
+          type     = "tcp"
+          interval = "10s"
+          timeout  = "2s"
+        }
+      }
+#      service {
+#        name = "jenkins-jnlp"
+#        tags = ["jenkins"]
+#        port = "jenkins_jnlp"
+#        check {
+#          name     = "alive"
+#          type     = "tcp"
+#          interval = "10s"
+#          timeout  = "2s"
+#        }
+#      }
+    }
+  }
+}
+```
+
 License
 -------
 
