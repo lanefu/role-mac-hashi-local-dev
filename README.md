@@ -19,6 +19,7 @@ How to use it
 * consul gui: http://consul.service.dc1.consul:8500/
 * nomad gui: http://nomad.service.dc1.consul:4646/
 * fabio gui: http://fabio.service.dc1.consul:9998/
+* due to nomad + mac docker limition.. view logs via `docker logs containername` 
 
 Using with fabio
 ---------------
