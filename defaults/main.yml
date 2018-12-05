@@ -1,2 +1,37 @@
 ---
 # defaults file for mac-hashi-local-dev
+
+
+brews:
+  - consul
+  - nomad
+  - fabio
+
+casks:
+  - docker
+
+state: present
+
+bin_path: /usr/local/bin
+app_data_root_path: /usr/local/var/
+launch_agent_path: "{{ ansible_env['HOME'] }}/Library/LaunchAgents"
+
+consul_domain: consul
+nomad_datacenter: dc1
+
+services_config:
+  nomad:
+    name: nomad
+    data_path: "{{ app_data_root_path }}/nomad"
+    path: "{{ bin_path }}/nomad"
+    args: "agent -dev -data-dir={{ app_data_root_path }}/nomad -dc={{nomad_datacenter}}"
+  consul:
+    name: consul
+    data_path: "{{ app_data_root_path }}/consul"
+    path: "{{ bin_path }}/consul"
+    args: "agent -dev -data-dir={{ app_data_root_path }}/consul -domain={{ consul_domain }} -ui=true"
+  fabio:
+    name: fabio
+    data_path: "{{ app_data_root_path }}/fabio"
+    path: "{{ bin_path }}/fabio"
+    args: "-log.access.target=stdout"

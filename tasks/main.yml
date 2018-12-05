@@ -1,2 +1,46 @@
 ---
 # tasks file for mac-hashi-local-dev
+
+- name: install brews
+  homebrew:
+    name: "{{ item }}"
+    state: "{{ state }}"
+  loop: "{{ brews }}"
+
+- name: install casks
+  homebrew_cask:
+    name: "{{ item }}"
+    state: "{{ state }}"
+  loop: "{{ casks }}"
+
+- name: create launcher plists for hashi services
+  template:
+    src: launchd.plist.j2
+    dest: "{{ launch_agent_path }}/{{ item.value.name }}.plist"
+  loop: "{{ services_config | dict2items}}"
+
+- name: start hashi services
+  debug:
+    msg: "start the hashi services" 
+
+- name: printe equivalent exectuon string
+  debug:
+    msg: "{{ bin_path }}/{{ item.value.name }} {{ item.value.args }}"
+  loop: "{{ services_config | dict2items}}"
+
+- name: create /etc/resolver directory
+  file:
+    path: /etc/resolver
+    state: directory
+  become: yes
+
+- name: install resolver
+  template:
+    src: resolver.domain.j2
+    dest: "/etc/resolver/{{ nomad_datacenter }}.{{ consul_domain }}"
+  become: yes
+
+- name: to load services
+  debug:
+    msg: "launchctl load {{ launch_agent_path }}/{{ item.value.name }}.plist"
+  loop: "{{ services_config | dict2items}}"

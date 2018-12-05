@@ -1,7 +1,7 @@
 Role Name
 =========
 
-A brief description of the role goes here.
+sets up local hashi setup
 
 Requirements
 ------------
@@ -20,13 +20,15 @@ A list of other roles hosted on Galaxy should go here, plus any details in regar
 
 Example Playbook
 ----------------
+```
 
-Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
+- hosts: workstation
 
-    - hosts: servers
-      roles:
-         - { role: username.rolename, x: 42 }
-
+  tasks: 
+    - name: setup hashi stack
+      include_role:
+        name: mac-hashi-local-dev
+```
 License
 -------
 
