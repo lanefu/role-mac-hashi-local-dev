@@ -23,7 +23,7 @@
   debug:
     msg: "start the hashi services" 
 
-- name: printe equivalent exectuon string
+- name: RUN these commands to launch services
   debug:
     msg: "{{ bin_path }}/{{ item.value.name }} {{ item.value.args }}"
   loop: "{{ services_config | dict2items}}"
