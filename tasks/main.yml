@@ -19,9 +19,15 @@
     dest: "{{ launch_agent_path }}/{{ item.value.name }}.plist"
   loop: "{{ services_config | dict2items}}"
 
-- name: start hashi services
-  debug:
-    msg: "start the hashi services" 
+- name: create config dir for extra nomad configs
+  file: 
+    path: "{{ app_data_root_path }}/nomad/config"
+    state: directory
+
+- name: tell nomad where docker auth is
+  template:
+    src: nomad_docker_auth.json.j2
+    dest: "{{ app_data_root_path }}/nomad/config/nomad_docker_auth.json"
 
 - name: RUN these commands to launch services
   debug:

@@ -21,6 +21,7 @@ How to use it
 * fabio gui: http://fabio.service.dc1.consul:9998/
 * due to nomad + mac docker limition.. view logs via `docker logs containername`
 * see `hashiparty.sh` in role `files/` for a start stop script
+* See notes in tips and tricks at bottom of page
 
 Using with fabio
 ---------------
@@ -134,6 +135,20 @@ job "jenkins" {
   }
 }
 ```
+
+## Tips and Tricks ##
+
+### nomad customization ###
+
+Basic config defaults are provided at command line execution, but addtional nomad json configurations can be placed in `/usr/local/var/nomad/config`.
+
+### OSXKEYCHAIN GOTCHA ###
+
+you will probably need to remove the following line from `$HOME/.docker/config.json`
+```
+ "credSstore" : "osxkeychain",
+```
+or find the nomad fix and let me know!   In the meantime, nomad has a a config.json file pointing to config.json for docker auth
 
 License
 -------

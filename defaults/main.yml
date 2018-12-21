@@ -24,7 +24,7 @@ services_config:
     name: nomad
     data_path: "{{ app_data_root_path }}/nomad"
     path: "{{ bin_path }}/nomad"
-    args: "agent -dev -data-dir={{ app_data_root_path }}/nomad -dc={{nomad_datacenter}}"
+    args: "agent -dev -data-dir={{ app_data_root_path }}/nomad -dc={{nomad_datacenter}} -config={{ app_data_root_path }}/nomad/config"
   consul:
     name: consul
     data_path: "{{ app_data_root_path }}/consul"
